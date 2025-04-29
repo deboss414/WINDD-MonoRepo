@@ -1,0 +1,535 @@
+# WinDD Project Summary
+
+## Project Overview
+WinDD is a React Native mobile application designed for task management and team collaboration, built with TypeScript and following modern development practices. The project uses a monorepo structure with separate frontend and backend applications, sharing common types and utilities.
+
+## Architecture
+
+### Frontend Architecture
+1. **Component Structure**
+   - Task-related components in `src/components/task/`
+   - Chat components in `src/components/chat/`
+   - Shared components in `src/components/shared/`
+   - Navigation components in `src/navigation/`
+   - Screens in `src/screens/`
+   - Services in `src/services/`
+   - Types in `src/types/`
+   - Utils in `src/utils/`
+
+2. **State Management**
+   - Zustand stores for global state
+   - React Query for server state
+   - Local state with React hooks
+   - Proper type safety throughout
+
+3. **Navigation**
+   - React Navigation 7.x
+   - Type-safe navigation
+   - Nested navigation structure
+   - Proper route handling
+
+### Backend Architecture
+1. **API Structure**
+   - RESTful endpoints
+   - Type-safe controllers
+   - Proper error handling
+   - Authentication middleware
+
+2. **Data Models**
+   - Mongoose schemas
+   - Type-safe models
+   - Proper validation
+   - Population handling
+
+3. **Services**
+   - Business logic separation
+   - Type-safe operations
+   - Error handling
+   - Data transformation
+
+## Type System
+
+### Frontend Types
+1. **Task Types**
+   ```typescript
+   interface Task {
+     _id: string;
+     title: string;
+     description?: string;
+     status: 'todo' | 'in-progress' | 'completed';
+     priority: 'low' | 'medium' | 'high';
+     dueDate?: Date;
+     createdBy: User;
+     assignedTo?: User;
+     progress: number;
+     subtasks: SubTask[];
+     comments: Comment[];
+   }
+   ```
+
+2. **Chat Types**
+   ```typescript
+   interface Participant {
+     id: string;
+     name: string;
+     email: string;
+     avatar?: string;
+     role: 'owner' | 'member';
+     lastSeen?: string;
+   }
+
+   interface Message {
+     id: string;
+     conversationId: string;
+     senderId: string;
+     senderName: string;
+     content: string;
+     timestamp: string;
+     readBy: string[];
+     replyTo?: {
+       id: string;
+       senderName: string;
+       content: string;
+     };
+   }
+
+   interface Conversation {
+     id: string;
+     _id?: string;
+     taskId: string;
+     taskTitle: string;
+     taskStatus: TaskStatus;
+     participants: Participant[];
+     lastMessage?: Message;
+     updatedAt: string;
+     unreadCount: number;
+     messages?: Message[];
+   }
+   ```
+
+3. **User Types**
+   ```typescript
+   interface User {
+     _id: string;
+     email: string;
+     displayName: string;
+     avatar?: string;
+   }
+   ```
+
+### Backend Types
+1. **Schema Types**
+   ```typescript
+   interface TaskSchema {
+     title: string;
+     description?: string;
+     status: string;
+     priority: string;
+     dueDate?: Date;
+     createdBy: Schema.Types.ObjectId;
+     assignedTo?: Schema.Types.ObjectId;
+     progress: number;
+     subtasks: SubTaskSchema[];
+     comments: CommentSchema[];
+   }
+
+   interface ConversationSchema {
+     taskId: string;
+     taskTitle: string;
+     taskStatus: TaskStatus;
+     participants: {
+       id: string;
+       name: string;
+       avatar?: string;
+       role: 'owner' | 'member';
+       lastSeen?: Date;
+     }[];
+     lastMessage?: {
+       id: string;
+       content: string;
+       senderId: string;
+       senderName: string;
+       timestamp: Date;
+     };
+     updatedAt: Date;
+     unreadCount: number;
+   }
+   ```
+
+2. **Response Types**
+   ```typescript
+   interface ApiResponse<T> {
+     success: boolean;
+     data?: T;
+     error?: string;
+   }
+   ```
+
+## Component Updates
+
+### Chat Components
+1. **ChatroomScreen**
+   - Enhanced type safety
+   - Proper message handling
+   - Participant management
+   - Real-time updates
+   - Message replies
+   - Message editing
+   - Message deletion
+   - Read status tracking
+
+2. **MessageList**
+   - Type-safe message rendering
+   - Proper timestamp handling
+   - Read status indicators
+   - Reply handling
+   - Edit/delete functionality
+   - Loading states
+   - Empty state handling
+
+3. **ChatInput**
+   - Message composition
+   - Reply handling
+   - Attachment support
+   - Type safety
+   - Error handling
+   - Loading states
+
+### Task Components
+1. **TaskHeader**
+   - Enhanced type safety
+   - Proper user display
+   - Status indicators
+   - Priority handling
+
+2. **TaskCard**
+   - Type-safe props
+   - Priority indicators
+   - Progress display
+   - Comment integration
+
+3. **SubTaskCard**
+   - Expandable design
+   - Avatar display
+   - Comment system
+   - Progress tracking
+
+### Shared Components
+1. **Modal Components**
+   - Platform-specific behaviors
+   - Type-safe props
+   - Form validation
+   - Error handling
+
+2. **CommentSection**
+   - Author display
+   - Reply system
+   - Type safety
+   - Proper validation
+
+3. **SmartSearchBar**
+   - Advanced filtering
+   - Type-safe search
+   - Proper validation
+   - Error handling
+
+## Backend Services
+
+### Chat Service
+1. **Conversation Management**
+   - Type-safe operations
+   - Proper validation
+   - Error handling
+   - Data transformation
+   - Participant handling
+   - Message tracking
+
+2. **Message Operations**
+   - Message creation
+   - Message editing
+   - Message deletion
+   - Reply handling
+   - Read status tracking
+   - Real-time updates
+
+3. **User Management**
+   - Authentication
+   - Authorization
+   - Profile handling
+   - Type safety
+
+### Task Service
+1. **CRUD Operations**
+   - Type-safe operations
+   - Proper validation
+   - Error handling
+   - Data transformation
+
+2. **Comment System**
+   - Author handling
+   - Reply management
+   - Type safety
+   - Proper validation
+
+3. **User Management**
+   - Authentication
+   - Authorization
+   - Profile handling
+   - Type safety
+
+## Technical Stack Updates
+
+### Frontend
+- Expo SDK 52.0.0
+- React 18.3.1
+- React Native 0.76.9
+- TypeScript 5.3.3
+- React Navigation 7.x
+- React Query 5.20.5
+- Zustand 4.5.0
+- Styled Components 5.3.11
+
+### Backend
+- Node.js with Express 4.18.2
+- TypeScript 5.3.3
+- MongoDB with Mongoose 8.0.3
+- JWT for authentication
+
+## Project Layout
+```
+WinDD-MonoRepo/
+├── WinDD-Frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── task/
+│   │   │   ├── chat/
+│   │   │   └── shared/
+│   │   ├── navigation/
+│   │   ├── screens/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── utils/
+│   ├── App.tsx
+│   └── package.json
+├── WinDD-Backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── utils/
+│   └── package.json
+└── shared/
+    └── types/
+```
+
+## Development Guidelines
+1. **Type Safety**
+   - Use TypeScript throughout
+   - Maintain strict type checking
+   - Follow type patterns
+   - Document type changes
+
+2. **Component Development**
+   - Follow existing patterns
+   - Maintain type safety
+   - Handle errors properly
+   - Document changes
+
+3. **Backend Integration**
+   - Use proper types
+   - Handle errors
+   - Validate data
+   - Transform responses
+
+4. **Testing**
+   - Write unit tests
+   - Test type safety
+   - Verify error handling
+   - Document tests
+
+5. **Documentation**
+   - Update README
+   - Document types
+   - Explain patterns
+   - Note changes
+
+## Notes for New LLM
+- Follow type patterns
+- Maintain strict type safety
+- Handle errors properly
+- Document changes
+- Test thoroughly
+- Follow existing patterns
+- Use proper types
+- Validate data
+- Transform responses
+- Update documentation
+
+## Recent Updates
+
+### Chat System Enhancements
+1. **Conversation ID Handling**
+   - Fixed MongoDB `_id` to frontend `id` transformation
+   - Updated `Conversation` interface to support both fields
+   - Enhanced type safety in data handling
+   - Improved error handling for missing IDs
+   - Added comprehensive logging
+
+2. **Type System Improvements**
+   - Enhanced `Conversation` interface:
+     ```typescript
+     export interface Conversation {
+       id: string;
+       _id?: string;  // Optional MongoDB _id field
+       taskId: string;
+       taskTitle: string;
+       taskStatus: TaskStatus;
+       participants: Participant[];
+       lastMessage?: Message;
+       updatedAt: string;
+       unreadCount: number;
+       messages?: Message[];
+     }
+     ```
+   - Improved type safety across components
+   - Enhanced error handling
+   - Better data validation
+   - Comprehensive logging
+
+3. **Data Transformation**
+   - Implemented proper data transformation:
+     ```typescript
+     const transformedData = data.map(conversation => ({
+       ...conversation,
+       id: conversation._id || conversation.id
+     }));
+     ```
+   - Added validation for transformed data
+   - Enhanced error handling
+   - Improved logging
+   - Better error recovery
+
+### Type System Updates
+1. **Interface Improvements**
+   - Enhanced type safety
+   - Updated interfaces to match backend
+   - Added proper optional fields
+   - Improved documentation
+   - Better validation
+
+2. **Data Model Alignment**
+   - Aligned frontend and backend types
+   - Fixed type mismatches
+   - Updated MongoDB integration
+   - Enhanced API responses
+   - Improved validation
+
+3. **Type Safety**
+   - Added type guards
+   - Enhanced assertions
+   - Improved checking
+   - Better validation
+   - Enhanced error handling
+
+## Current Implementation Status
+
+### Chat System
+1. **Conversation Management**
+   - Proper ID handling
+   - Enhanced type safety
+   - Improved error handling
+   - Better transformation
+   - Enhanced logging
+
+2. **Message Handling**
+   - Proper loading
+   - Enhanced errors
+   - Improved safety
+   - Better validation
+   - Enhanced logging
+
+3. **UI Components**
+   - Updated list
+   - Enhanced errors
+   - Improved loading
+   - Better safety
+   - Enhanced feedback
+
+### Type System
+1. **Frontend Types**
+   - Enhanced conversations
+   - Improved messages
+   - Better participants
+   - Enhanced errors
+   - Improved validation
+
+2. **Backend Types**
+   - Updated MongoDB
+   - Enhanced API
+   - Improved validation
+   - Better errors
+   - Enhanced responses
+
+## Current Issues and TODOs
+
+### Chat System
+1. **Conversation Management**
+   - [ ] More error handling
+   - [ ] Better validation
+   - [ ] Improved logging
+   - [ ] More type safety
+   - [ ] Better recovery
+
+2. **Message Handling**
+   - [ ] Message validation
+   - [ ] Better errors
+   - [ ] Improved safety
+   - [ ] Better logging
+   - [ ] Enhanced recovery
+
+3. **UI Components**
+   - [ ] Loading indicators
+   - [ ] Better errors
+   - [ ] Improved safety
+   - [ ] Better validation
+   - [ ] Enhanced feedback
+
+### Type System
+1. **Type Safety**
+   - [ ] More type guards
+   - [ ] Better assertions
+   - [ ] Improved checking
+   - [ ] Better validation
+   - [ ] Enhanced errors
+
+2. **Documentation**
+   - [ ] Update types
+   - [ ] Add examples
+   - [ ] Better errors
+   - [ ] Improved validation
+   - [ ] Better transformation
+
+## Next Steps
+1. Complete chat improvements
+2. Enhance type safety
+3. Improve error handling
+4. Add better logging
+5. Enhance documentation
+6. Add more validation
+7. Improve recovery
+8. Enhance feedback
+9. Add type guards
+10. Improve checking
+
+## Notes for New LLM
+- Follow type patterns
+- Maintain type safety
+- Handle errors properly
+- Document changes
+- Test thoroughly
+- Follow patterns
+- Use proper types
+- Validate data
+- Transform responses
+- Update documentation
