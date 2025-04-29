@@ -31,10 +31,53 @@ export const chatApi = {
   // Get a single conversation with its messages
   getConversation: async (conversationId: string): Promise<Conversation> => {
     try {
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.2.40:3001/api';
+      console.log('API URL:', apiUrl);
+      console.log('Making API call to fetch conversation:', `${apiUrl}/chat/conversations/${conversationId}`);
+      
       const response = await api.get<Conversation>(`/chat/conversations/${conversationId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching conversation:', error);
+      console.log('API response received:', {
+        status: response.status,
+        data: response.data,
+        hasMessages: !!response.data?.messages,
+        messageCount: response.data?.messages?.length
+      });
+      
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+      
+      // Process messages to match frontend structure
+      const messages = response.data.messages?.map(msg => {
+        console.log('Processing message from backend:', msg);
+        return {
+          id: msg._id?.toString() || msg.id,
+          conversationId: msg.conversationId || conversationId,
+          senderId: msg.senderId,
+          senderName: msg.senderName,
+          content: msg.content,
+          timestamp: msg.timestamp || msg.createdAt || new Date().toISOString(),
+          readBy: msg.readBy || [],
+          replyTo: msg.replyTo
+        };
+      }) || [];
+      
+      console.log('Processed messages for frontend:', messages);
+      
+      return {
+        ...response.data,
+        messages,
+        id: conversationId
+      };
+    } catch (error: any) {
+      console.error('Error in getConversation:', {
+        error,
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+        url: error?.config?.url,
+        baseURL: error?.config?.baseURL
+      });
       throw error;
     }
   },
@@ -78,13 +121,47 @@ export const chatApi = {
   // Send a new message
   sendMessage: async (conversationId: string, content: string, replyTo?: string): Promise<Message> => {
     try {
+      console.log('Sending message:', { conversationId, content, replyTo });
       const response = await api.post<Message>(`/chat/conversations/${conversationId}/messages`, {
         content,
         replyTo
       });
-      return response.data;
-    } catch (error) {
-      console.error('Error sending message:', error);
+      
+      console.log('Message response:', response.data);
+      
+      if (!response.data) {
+        console.error('No response data received');
+        throw new Error('No response data received from server');
+      }
+      
+      // Ensure we have a valid ID
+      const messageId = response.data._id?.toString() || response.data.id;
+      if (!messageId) {
+        console.error('Invalid message ID in response:', response.data);
+        throw new Error('Invalid message ID in response');
+      }
+      
+      // Construct the message object with all required fields
+      const message: Message = {
+        id: messageId,
+        conversationId: conversationId,
+        content: response.data.content,
+        senderId: response.data.senderId,
+        senderName: response.data.senderName,
+        timestamp: response.data.timestamp || response.data.createdAt || new Date().toISOString(),
+        readBy: response.data.readBy || [],
+        replyTo: response.data.replyTo
+      };
+      
+      console.log('Processed message for frontend:', message);
+      return message;
+    } catch (error: any) {
+      console.error('Error in sendMessage:', {
+        error,
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status
+      });
       throw error;
     }
   },

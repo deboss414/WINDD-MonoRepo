@@ -11,11 +11,13 @@ export interface Participant {
 
 export interface Message {
   id: string;
+  _id?: string;
   conversationId: string;
   senderId: string;
   senderName: string;
   content: string;
   timestamp: string;
+  createdAt?: string;
   readBy: string[];
   replyTo?: {
     id: string;

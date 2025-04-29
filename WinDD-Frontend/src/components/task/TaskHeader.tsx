@@ -9,13 +9,15 @@ import {
   Modal,
   Platform,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { getColors } from '../../constants/colors';
-import { Task } from '../../../../shared/types/task.types';
+import { Task, TaskStatus, TaskPriority, User } from '../../types/task';
 import { Comment as FrontendComment } from '../../types/comment';
 import { Comment as SharedComment } from '../../../../shared/types/comment.types';
 import { TaskFormModal } from './TaskFormModal';
+import { useNavigation } from '@react-navigation/native';
+import { chatApi } from '../../api/chatApi';
+import { Conversation } from '../../types/chat';
 
 interface TaskHeaderProps {
   task: Task;
@@ -26,8 +28,6 @@ interface TaskHeaderProps {
   onDeleteTask: () => Promise<void>;
   onUpdateTask: (updatedTask: Task) => void;
 }
-
-type TaskStatus = 'in-progress' | 'completed' | 'expired' | 'closed';
 
 const statusLabels: Record<TaskStatus, string> = {
   'in-progress': 'In Progress',
@@ -84,6 +84,7 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const navigation = useNavigation();
 
   const handleStatusChange = async (newStatus: TaskStatus) => {
     try {
@@ -114,6 +115,47 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
       setShowDeleteConfirm(false);
     } catch (error) {
       Alert.alert('Error', 'Failed to delete task');
+    }
+  };
+
+  const handleGoToChat = async () => {
+    setShowMenu(false);
+    try {
+      // First check if a conversation already exists for this task
+      const conversations = await chatApi.getConversations();
+      const existingConversation = conversations.find((c: Conversation) => c.taskId === task.id);
+      
+      if (existingConversation) {
+        // Navigate to existing conversation
+        (navigation as any).navigate('Chatroom', {
+          conversationId: existingConversation.id,
+          taskId: task.id,
+          taskTitle: task.title,
+          taskStatus: task.status,
+          isFirstLoad: true,
+          participants: task.participants
+        });
+      } else {
+        // Create new conversation
+        const conversation = await chatApi.createConversation(task.id);
+        
+        if (!conversation || !conversation.id) {
+          throw new Error('Failed to create conversation: No ID returned');
+        }
+        
+        // Navigate to new conversation
+        (navigation as any).navigate('Chatroom', {
+          conversationId: conversation.id,
+          taskId: task.id,
+          taskTitle: task.title,
+          taskStatus: task.status,
+          isFirstLoad: true,
+          participants: task.participants
+        });
+      }
+    } catch (error) {
+      console.error('Error handling chat navigation:', error);
+      Alert.alert('Error', 'Failed to open chat. Please try again.');
     }
   };
 
@@ -190,6 +232,13 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
           >
             <MaterialIcons name="edit" size={20} color={colors.text} />
             <Text style={[styles.menuItemText, { color: colors.text }]}>Edit Task</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleGoToChat}
+          >
+            <MaterialIcons name="chat" size={20} color={colors.text} />
+            <Text style={[styles.menuItemText, { color: colors.text }]}>Go to Chat</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}

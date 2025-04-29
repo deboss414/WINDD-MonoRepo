@@ -1,5 +1,5 @@
 import { Conversation, Message } from '../../types/chat';
-import { api } from '../base/api';
+import { api } from '../../api/api';
 
 class ChatService {
   private static instance: ChatService;

@@ -12,7 +12,6 @@ import { ChatroomHeaderProps } from './types';
 
 export const ChatroomHeader: React.FC<ChatroomHeaderProps> = ({
   taskTitle,
-  taskId,
   participants,
   onBackPress,
   onMenuPress,

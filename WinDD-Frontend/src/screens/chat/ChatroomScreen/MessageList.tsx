@@ -46,7 +46,13 @@ export const MessageList: React.FC<MessageListProps> = ({
   flatListRef,
   loading,
 }) => {
-  console.log('MessageList received messages:', messages);
+  console.log('MessageList received props:', {
+    messageCount: messages.length,
+    loading,
+    currentUserId,
+    messages: messages
+  });
+
   const [messageLikes, setMessageLikes] = useState<MessageLikes>({});
   const lastTapRef = useRef<{ [key: string]: number }>({});
 
@@ -82,7 +88,13 @@ export const MessageList: React.FC<MessageListProps> = ({
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
-    console.log('Rendering message:', item);
+    console.log('Rendering message:', {
+      id: item.id,
+      content: item.content,
+      senderName: item.senderName,
+      timestamp: item.timestamp
+    });
+    
     const isCurrentUser = item.senderId === currentUserId;
     const avatarColor = getAvatarColor(item.senderName);
     const likeCount = getLikeCount(item.id);
@@ -238,49 +250,36 @@ export const MessageList: React.FC<MessageListProps> = ({
     );
   };
 
-  const ListHeaderComponent = () => {
-    if (!loading) return null;
+  if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.secondaryText }]}>
-          Loading messages...
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (!messages || messages.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={[styles.emptyText, { color: colors.secondaryText }]}>
+          No messages yet
         </Text>
       </View>
     );
-  };
+  }
 
   return (
-    <FlatList
-      ref={flatListRef}
-      data={messages}
-      renderItem={renderMessage}
-      keyExtractor={item => item.id}
-      contentContainerStyle={[
-        styles.messagesList,
-        messages.length === 0 && styles.emptyContainer
-      ]}
-      onContentSizeChange={() => {
-        if (messages.length > 0) {
-          flatListRef.current?.scrollToEnd({ animated: true });
-        }
-      }}
-      showsVerticalScrollIndicator={false}
-      inverted={false}
-      ListHeaderComponent={ListHeaderComponent}
-      ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          {!loading && (
-            <>
-              <MaterialIcons name="chat-bubble-outline" size={48} color={colors.secondaryText} />
-              <Text style={[styles.emptyText, { color: colors.secondaryText }]}>
-                No messages yet. Start the conversation!
-              </Text>
-            </>
-          )}
-        </View>
-      }
-    />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        renderItem={renderMessage}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        onEndReachedThreshold={0.5}
+        inverted={false}
+      />
+    </View>
   );
 };
 
@@ -440,5 +439,20 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  listContent: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  listHeader: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  container: {
+    flex: 1,
   },
 }); 
